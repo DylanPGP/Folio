@@ -45,7 +45,7 @@ jobs:
             react-native-screens react-native-safe-area-context react-native-svg \
             @react-native-async-storage/async-storage expo-document-picker expo-file-system \
             expo-image-picker expo-sharing expo-local-authentication expo-constants \
-            react-native-webview @expo/vector-icons \
+            react-native-webview react-native-gesture-handler @expo/vector-icons \
             mammoth base64-arraybuffer @epubjs-react-native/core @epubjs-react-native/expo-file-system \
             react-native-pdf react-native-blob-util
 
