@@ -1,40 +1,69 @@
-name: Build Folio APK
+name: Build APK
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:        # botón "Run workflow" en la pestaña Actions
   push:
-    branches: [ main ]
+    tags: ['v*']            # al subir una etiqueta v1.0.0 también crea la release
+
+permissions:
+  contents: write           # necesario para adjuntar el APK a la release
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 22
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
-          distribution: 'zulu'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
+
+      # El repo solo tiene el código de Folio (carpeta folio/), sin package.json.
+      # Aquí se crea un proyecto Expo SDK 54 limpio en la carpeta build-app/.
+      - name: Crear proyecto Expo base (SDK 54)
+        run: npx --yes create-expo-app@latest build-app --template blank-typescript@sdk-54 --no-install --yes
+
+      - name: Copiar el código de Folio
+        run: |
+          cp -r folio/src build-app/
+          cp -r folio/assets/. build-app/assets/
+          cp folio/App.tsx folio/app.json folio/LICENSE build-app/
 
       - name: Instalar dependencias
+        working-directory: build-app
         run: |
-          cd folio
           npm install
+          npx expo install \
+            @react-navigation/native @react-navigation/bottom-tabs @react-navigation/native-stack \
+            react-native-screens react-native-safe-area-context react-native-svg \
+            @react-native-async-storage/async-storage expo-document-picker expo-file-system \
+            expo-image-picker expo-sharing expo-local-authentication expo-constants \
+            react-native-webview @expo/vector-icons \
+            mammoth base64-arraybuffer @epubjs-react-native/core @epubjs-react-native/expo-file-system \
+            react-native-pdf react-native-blob-util
+
+      - name: Generar proyecto Android
+        working-directory: build-app
+        run: npx expo prebuild --platform android --no-install
 
       - name: Compilar APK
-        run: |
-          cd folio/android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+        working-directory: build-app/android
+        run: ./gradlew assembleRelease
 
       - name: Guardar APK como artefacto
         uses: actions/upload-artifact@v4
         with:
           name: folio-apk
-          path: folio/android/app/build/outputs/apk/debug/app-debug.apk
+          path: build-app/android/app/build/outputs/apk/release/*.apk
+
+      - name: Publicar en la release (solo con etiquetas)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build-app/android/app/build/outputs/apk/release/*.apk
           
