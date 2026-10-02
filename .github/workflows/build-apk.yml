@@ -1,4 +1,4 @@
-name: Build APK
+name: Build Folio APK
 
 on:
   workflow_dispatch:
@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Folio/folio
 
     steps:
       - uses: actions/checkout@v4
@@ -25,17 +22,19 @@ jobs:
           java-version: '17'
 
       - name: Instalar dependencias
-        run: npm install
+        run: |
+          cd folio
+          npm install
 
       - name: Compilar APK
         run: |
-          cd android
+          cd folio/android
           chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Guardar APK como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: app-debug-apk
-          path: Folio/folio/android/app/build/outputs/apk/debug/app-debug.apk
+          name: folio-apk
+          path: folio/android/app/build/outputs/apk/debug/app-debug.apk
           
