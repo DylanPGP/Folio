@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "Folio",
+    "slug": "folio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "android": {
+      "package": "com.dylanrc.folio",
+      "permissions": [
+        "USE_BIOMETRIC"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#222224"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.dylanrc.folio"
+    },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Folio usa la biometría para proteger tu biblioteca."
+        }
+      ]
+    ],
+    "icon": "./assets/icon.png"
+  }
+}
